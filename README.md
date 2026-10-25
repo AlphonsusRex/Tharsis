@@ -16,7 +16,7 @@ Tharsis te permite escribir C con palabras clave en español (`entero`, `si`, `m
 ## Instalación
 
 ```bash
-git clone https://github.com/TU-USUARIO/tharsis.git
+git clone https://github.com/AlphonsusRex/Tharsis.git
 cd tharsis
 g++ -std=c++17 -O2 tharsis_gen.cpp -o tharsis_gen
 { _ble_edit_exec_gexec__save_lastarg "$@"; } 4>&1 5>&2 &>/dev/null
