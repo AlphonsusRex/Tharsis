@@ -1,0 +1,31 @@
+# Binarios
+tharsis_gen
+*.o
+*.out
+
+# Artefactos generados por los golden tests
+test/golden/*.c
+!test/golden/*.c.esperado
+
+# Ejecutables sueltos que se cuelan
+test/golden/01_hola_mundo
+test/golden/02_variables
+test/golden/03_control_flujo
+test/golden/04_operadores
+test/golden/05_strings_escapes
+test/golden/06_comentarios
+test/golden/07_chars
+test/golden/08_directivas
+test/golden/09a_principal_sin_tipo
+test/golden/09b_principal_void
+test/golden/09c_principal_int
+test/golden/10_programa_completo
+
+# Ejemplos compilados
+examples/*.c
+examples/hola_mundo
+
+# Basura del sistema
+.DS_Store
+*.swp
+*~

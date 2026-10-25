@@ -1,0 +1,52 @@
+/* ============================================================ */
+/* Generado por tharsis_gen desde: 03_control_flujo.t
+   NO EDITAR: modificar el .t y volver a transpilar            */
+/* ============================================================ */
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <stdbool.h>
+
+/* Macro de tomar_cadena(var, tam): lee una línea de stdin.      */
+/* 'tam' es el tamaño total del buffer 'var'.                   */
+#ifndef tomar_cadena
+#define tomar_cadena(var, tam) fgets((var), (tam), stdin)
+#endif
+
+int main() {
+    int x = 10;
+
+    if (x > 5) {
+        printf("mayor\n");
+    } else {
+        printf("menor\n");
+    }
+
+    while (x > 0) {
+        x = x - 1;
+    }
+
+    for (int i = 0; i < 3; i = i + 1) {
+        if (i == 1) {
+            continue;
+        }
+        if (i == 2) {
+            break;
+        }
+    }
+
+    switch (x) {
+        case 0:
+            printf("cero\n");
+            break;
+        case 1:
+            printf("uno\n");
+            break;
+        default:
+            printf("otro\n");
+            break;
+    }
+
+    return 0;
+}

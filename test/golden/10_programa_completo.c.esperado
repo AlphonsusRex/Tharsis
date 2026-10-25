@@ -1,0 +1,56 @@
+/* ============================================================ */
+/* Generado por tharsis_gen desde: 10_programa_completo.t
+   NO EDITAR: modificar el .t y volver a transpilar            */
+/* ============================================================ */
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <stdbool.h>
+
+/* Macro de tomar_cadena(var, tam): lee una línea de stdin.      */
+/* 'tam' es el tamaño total del buffer 'var'.                   */
+#ifndef tomar_cadena
+#define tomar_cadena(var, tam) fgets((var), (tam), stdin)
+#endif
+
+#include <math.h>
+
+#define MAX_ITEMS 5
+
+// programa integrador: combina tipos, control de flujo, operadores,
+// strings, chars y comentarios
+
+int main() {
+    int contador = 0;
+    int suma = 0;
+    float promedio = 0.0;
+    bool activo = true;
+    char marca = 'X';
+
+    /* bucle principal */
+    while (contador < MAX_ITEMS) {
+        if (contador && activo) {
+            suma = suma + contador;
+        }
+        contador = contador + 1;
+    }
+
+    if (suma > 0) {
+        promedio = suma / 5.0;
+        printf("suma: %d, promedio: %f\n", suma, promedio);
+    } else {
+        printf("suma cero\n");
+    }
+
+    switch (contador) {
+        case 5:
+            printf("contador es 5, marca=%c\n", marca);
+            break;
+        default:
+            printf("contador raro\n");
+            break;
+    }
+
+    return 0;
+}
