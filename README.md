@@ -58,7 +58,9 @@ Clonar y compilar:
 El ejemplo completo está en `examples/esp32/blinky/`.
 
 `examples/esp32/blinky/main/blinky.t`:
+![Blinky en ESP32-WROOM-32](docs/img/blinky_small.gif)
 
+*LED del GPIO 2 parpadeando cada 500 ms en una ESP32-WROOM-32 real.*
     #include "driver/gpio.h"
 
     #define LED_GPIO 2
