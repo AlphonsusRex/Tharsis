@@ -71,7 +71,8 @@ bool hay_tipo_antes(const std::string& resultado) {
 // ============================================================
 std::string procesar_linea(const std::string& linea,
                            EstadoLexer& estado,
-                           const std::vector<ReglaTraduccion>& dicc) {
+                           const std::vector<ReglaTraduccion>& dicc, 
+                           bool modo_idf) {
     std::string resultado;
     size_t i = 0;
 
@@ -173,28 +174,37 @@ std::string procesar_linea(const std::string& linea,
             for (const auto& regla : dicc) {
                 if (regla.palabra_tharsis != palabra) continue;
 
-                if (palabra == "principal") {
-                    // ¿Le sigue '('? Entonces es definición/llamada.
-                    size_t j = i;
-                    while (j < linea.size() &&
-                           std::isspace(static_cast<unsigned char>(linea[j]))) ++j;
-                    bool seguido_de_paren = (j < linea.size() && linea[j] == '(');
+                    if (palabra == "principal") {
+                        // ¿Le sigue '('? Entonces es definición/llamada.
+                        size_t j = i;
+                        while (j < linea.size() &&
+                            std::isspace(static_cast<unsigned char>(linea[j]))) ++j;
+                        bool seguido_de_paren = (j < linea.size() && linea[j] == '(');
 
-                    if (seguido_de_paren && !hay_tipo_antes(resultado)) {
-                        resultado += "int main";  // principal() → int main()
+                        if (modo_idf) {
+                            // En ESP-IDF, el entry point es void app_main(void)
+                            if (seguido_de_paren && !hay_tipo_antes(resultado)) {
+                                resultado += "void app_main";
+                            } else {
+                                resultado += "app_main";
+                            }
+                        } else {
+                            // Modo host: int main()
+                            if (seguido_de_paren && !hay_tipo_antes(resultado)) {
+                                resultado += "int main";
+                            } else {
+                                resultado += "main";
+                            }
+                        }
                     } else {
-                        resultado += "main";      // int principal() → int main()
+                        resultado += regla.equivalente_c;
                     }
-                } else {
-                    resultado += regla.equivalente_c;
+                    traducida = true;
+                    break;
                 }
-                traducida = true;
-                break;
+                if (!traducida) resultado += palabra;
+                continue;
             }
-            if (!traducida) resultado += palabra;
-            continue;
-        }
-
         // Cualquier otro carácter (operadores, números, espacios...).
         resultado += c;
         ++i;
@@ -215,7 +225,7 @@ std::string basename(const std::string& path) {
 // ============================================================
 int main(int argc, char* argv[]) {
     if (argc < 2) {
-        std::cout << "Uso: tharsis_gen <archivo.t> [--solo-c]\n";
+        std::cout << "Uso: tharsis_gen <archivo.t> [--solo-c] [--modo idf]\n";
         std::cout << "  Transpila un archivo Tharsis (.t) a C (.c).\n";
         std::cout << "  --solo-c : solo genera el .c, no compila con gcc.\n";
         return 1;
@@ -223,6 +233,14 @@ int main(int argc, char* argv[]) {
 
     std::string nombre_archivo = argv[1];
     bool solo_c = (argc >= 3 && std::string(argv[2]) == "--solo-c");
+
+    bool modo_idf = false;
+    for (int i = 2; i < argc; ++i){
+      if(std::string(argv[i]) == "--modo" && i + 1 < argc){
+        modo_idf = (std::string(argv[i + 1]) == "idf");
+        ++i;
+      }
+    }
 
     // Extensión .t / .T
     if (nombre_archivo.length() < 2) {
@@ -317,21 +335,35 @@ int main(int argc, char* argv[]) {
     salida << "/* Generado por tharsis_gen desde: " << basename(nombre_archivo) << "\n";
     salida << "   NO EDITAR: modificar el .t y volver a transpilar            */\n";
     salida << "/* ============================================================ */\n\n";
-    salida << "#include <stdio.h>\n";
-    salida << "#include <stdlib.h>\n";
-    salida << "#include <string.h>\n";
-    salida << "#include <stdbool.h>\n\n";
-    salida << "/* Macro de tomar_cadena(var, tam): lee una línea de stdin.      */\n";
-    salida << "/* 'tam' es el tamaño total del buffer 'var'.                   */\n";
-    salida << "#ifndef tomar_cadena\n";
-    salida << "#define tomar_cadena(var, tam) fgets((var), (tam), stdin)\n";
-    salida << "#endif\n\n";
 
+     if (modo_idf) {
+        // Cabecera ESP-IDF
+        salida << "#include <stdio.h>\n";
+        salida << "#include <stdlib.h>\n";
+        salida << "#include <string.h>\n";
+        salida << "#include <stdbool.h>\n";
+        salida << "#include \"freertos/FreeRTOS.h\"\n";
+        salida << "#include \"freertos/task.h\"\n";
+        salida << "#include \"esp_log.h\"\n\n";
+        salida << "static const char *TAG = \"tharsis\";\n\n";
+    } else {
+        // Cabecera host (actual)
+        salida << "#include <stdio.h>\n";
+        salida << "#include <stdlib.h>\n";
+        salida << "#include <string.h>\n";
+        salida << "#include <stdbool.h>\n\n";
+        salida << "/* Macro de tomar_cadena(var, tam): lee una línea de stdin.      */\n";
+        salida << "/* 'tam' es el tamaño total del buffer 'var'.                   */\n";
+        salida << "#ifndef tomar_cadena\n";
+        salida << "#define tomar_cadena(var, tam) fgets((var), (tam), stdin)\n";
+        salida << "#endif\n\n";
+    }
+    
     // --- Procesar archivo línea a línea ---
     EstadoLexer estado;
     std::string linea;
     while (std::getline(entrada, linea)) {
-        salida << procesar_linea(linea, estado, dicc) << "\n";
+        salida << procesar_linea(linea, estado, dicc, modo_idf) << "\n";
     }
     if (estado.en_comentario_bloque) {
         std::cerr << "Advertencia: comentario /* sin cerrar al final del archivo\n";
