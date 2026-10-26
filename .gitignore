@@ -29,3 +29,9 @@ examples/hola_mundo
 .DS_Store
 *.swp
 *~
+
+# ESP-IDF
+examples/esp32/*/build/
+examples/esp32/*/main/*.c
+examples/esp32/*/sdkconfig
+examples/esp32/*/sdkconfig.old
