@@ -173,13 +173,24 @@ std::string procesar_linea(const std::string& linea,
             bool traducida = false;
             for (const auto& regla : dicc) {
                 if (regla.palabra_tharsis != palabra) continue;
+                
+                                if (palabra == "imprimir" && modo_idf) {
+                    resultado += "ESP_LOGI(TAG, ";
+                    // Saltar espacios y el '(' que sigue a 'imprimir'
+                    while (i < linea.size() &&
+                           std::isspace(static_cast<unsigned char>(linea[i]))) ++i;
+                    if (i < linea.size() && linea[i] == '(') ++i;
+                    traducida = true;
+                    break;
+                }
 
-                    if (palabra == "principal") {
-                        // ¿Le sigue '('? Entonces es definición/llamada.
-                        size_t j = i;
-                        while (j < linea.size() &&
-                            std::isspace(static_cast<unsigned char>(linea[j]))) ++j;
-                        bool seguido_de_paren = (j < linea.size() && linea[j] == '(');
+
+                if (palabra == "principal") {
+                    // ¿Le sigue '('? Entonces es definición/llamada.
+                    size_t j = i;
+                    while (j < linea.size() &&
+                        std::isspace(static_cast<unsigned char>(linea[j]))) ++j;
+                    bool seguido_de_paren = (j < linea.size() && linea[j] == '(');
 
                         if (modo_idf) {
                             // En ESP-IDF, el entry point es void app_main(void)
