@@ -357,6 +357,7 @@ int main(int argc, char* argv[]) {
         salida << "#include \"freertos/task.h\"\n";
         salida << "#include \"esp_log.h\"\n\n";
         salida << "static const char *TAG = \"tharsis\";\n\n";
+        salida << "#define retardo(ms) vTaskDelay(pdMS_TO_TICKS(ms))\n\n";
     } else {
         // Cabecera host (actual)
         salida << "#include <stdio.h>\n";
