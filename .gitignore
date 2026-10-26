@@ -35,3 +35,8 @@ examples/esp32/*/build/
 examples/esp32/*/main/*.c
 examples/esp32/*/sdkconfig
 examples/esp32/*/sdkconfig.old
+
+# Archivos swap de editores
+*.kate-swp
+.*.swp
+*~
