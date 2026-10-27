@@ -363,6 +363,7 @@ int main(int argc, char* argv[]) {
         salida << "#define LOG_INFO(...)  ESP_LOGI(TAG, __VA_ARGS__)\n";
         salida << "#define LOG_AVISO(...) ESP_LOGW(TAG, __VA_ARGS__)\n";
         salida << "#define LOG_ERROR(...) ESP_LOGE(TAG, __VA_ARGS__)\n\n";
+        salida << "#define tarea(func, nombre) xTaskCreate(func, nombre, 2048, NULL, 5, NULL)\n\n";
     } else {
         // Cabecera host (actual)
         salida << "#include <stdio.h>\n";
