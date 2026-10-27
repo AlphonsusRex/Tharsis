@@ -174,7 +174,7 @@ std::string procesar_linea(const std::string& linea,
             for (const auto& regla : dicc) {
                 if (regla.palabra_tharsis != palabra) continue;
                 
-                                if (palabra == "imprimir" && modo_idf) {
+                if (palabra == "imprimir" && modo_idf) {
                     resultado += "ESP_LOGI(TAG, ";
                     // Saltar espacios y el '(' que sigue a 'imprimir'
                     while (i < linea.size() &&
@@ -183,8 +183,8 @@ std::string procesar_linea(const std::string& linea,
                     traducida = true;
                     break;
                 }
-
-
+                
+                
                 if (palabra == "principal") {
                     // ¿Le sigue '('? Entonces es definición/llamada.
                     size_t j = i;
@@ -360,6 +360,9 @@ int main(int argc, char* argv[]) {
         salida << "static const char *TAG = \"tharsis\";\n\n";
         salida << "#define retardo(ms) vTaskDelay(pdMS_TO_TICKS(ms))\n\n";
         salida << "#define retardo_ms(ms) vTaskDelay(pdMS_TO_TICKS(ms))\n\n";
+        salida << "#define LOG_INFO(...)  ESP_LOGI(TAG, __VA_ARGS__)\n";
+        salida << "#define LOG_AVISO(...) ESP_LOGW(TAG, __VA_ARGS__)\n";
+        salida << "#define LOG_ERROR(...) ESP_LOGE(TAG, __VA_ARGS__)\n\n";
     } else {
         // Cabecera host (actual)
         salida << "#include <stdio.h>\n";
