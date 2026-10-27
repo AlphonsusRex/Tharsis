@@ -322,6 +322,7 @@ int main(int argc, char* argv[]) {
         // Modificadores
         {"constante",    "const"},
         {"estatico",     "static"},
+        {"volatil",      "volatile"},
         {"sin_signo",    "unsigned"},
         {"con_signo",    "signed"},
         {"estructura",   "struct"},
@@ -358,6 +359,7 @@ int main(int argc, char* argv[]) {
         salida << "#include \"esp_log.h\"\n\n";
         salida << "static const char *TAG = \"tharsis\";\n\n";
         salida << "#define retardo(ms) vTaskDelay(pdMS_TO_TICKS(ms))\n\n";
+        salida << "#define retardo_ms(ms) vTaskDelay(pdMS_TO_TICKS(ms))\n\n";
     } else {
         // Cabecera host (actual)
         salida << "#include <stdio.h>\n";
