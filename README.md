@@ -97,6 +97,41 @@ El LED del GPIO 2 (normalmente el LED azul integrado) parpadea cada 500 ms.
 
 **Verificado en**: ESP32-WROOM-32 (ESP32-D0WDQ6 rev 1.0).
 
+## Uso en ESP32 (ADC)
+
+Lee un potenciómetro en el GPIO 34 y muestra el valor por el monitor serie.
+
+`examples/esp32/adc/main/adc.t`:
+
+    #include "driver/adc.h"
+    
+    #define CANAL_ADC ADC1_CHANNEL_6   // GPIO 34
+    
+    vacio tarea_lectura(vacio *arg) {
+        mientras (verdadero) {
+            entero valor = adc1_get_raw(CANAL_ADC);
+            LOG_INFO("Valor ADC: %d", valor);
+            retardo_ms(500);
+        }
+    }
+    
+    principal() {
+        adc1_config_width(ADC_WIDTH_BIT_12);
+        adc1_config_channel_atten(CANAL_ADC, ADC_ATTEN_DB_11);
+        LOG_INFO("ADC inicializado en GPIO 34");
+        tarea(tarea_lectura, "tarea_adc");
+        mientras (verdadero) {
+            retardo_ms(1000);
+        }
+    }
+
+Compilar y flashear:
+
+    cd examples/esp32/adc
+    ../../../../tharsis_gen main/adc.t --modo idf --solo-c
+    idf.py build
+    idf.py -p /dev/ttyUSB0 flash monitor
+
 ## Referencia Tharsis ↔ C
 
 Esta tabla es el contrato del lenguaje. Cualquier cambio aquí es un cambio de versión.
@@ -164,6 +199,16 @@ Los operadores se reconocen por palabra completa. `nota` y `yacimiento` no se ve
 | `tomar_cadena(buf, tam)` | `fgets(buf, tam, stdin)` (solo host) |
 | `retardo(ms)` | `vTaskDelay(pdMS_TO_TICKS(ms))` (solo idf) |
 | `principal` | `main` (host) / `app_main` (idf) |
+
+### Azúcar ESP-IDF (solo modo idf)
+
+| Tharsis | C (ESP-IDF) |
+|---|---|
+| `LOG_INFO(...)` | `ESP_LOGI(TAG, ...)` |
+| `LOG_AVISO(...)` | `ESP_LOGW(TAG, ...)` |
+| `LOG_ERROR(...)` | `ESP_LOGE(TAG, ...)` |
+| `retardo_ms(ms)` | `vTaskDelay(pdMS_TO_TICKS(ms))` |
+| `tarea(func, nombre)` | `xTaskCreate(func, nombre, 2048, NULL, 5, NULL)` |
 
 ## Cómo funciona
 
