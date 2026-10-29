@@ -17,7 +17,7 @@ vacio tarea_onda(vacio *arg) {
             paso = 1;
         }
         
-        retardo_ms(5);
+        retardo_ms(10);
     }
 }
 
