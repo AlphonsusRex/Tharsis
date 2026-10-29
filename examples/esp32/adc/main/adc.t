@@ -16,7 +16,7 @@ principal() {
     adc1_config_channel_atten(CANAL_ADC, ADC_ATTEN_DB_11);
 
     LOG_INFO("ADC inicializado en GPIO 34 (canal 6)");
-    tarea(tarea_lectura, "tarea_adc");
+    cCrearTarea(tarea_lectura, "tarea_adc", 2048, nulo, 1, nulo);
 
     mientras (verdadero) {
         retardo_ms(1000);
