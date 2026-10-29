@@ -3,18 +3,9 @@
    NO EDITAR: modificar el .t y volver a transpilar            */
 /* ============================================================ */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <stdbool.h>
+#include "tharsis_host.h"
 
-/* Macro de tomar_cadena(var, tam): lee una línea de stdin.      */
-/* 'tam' es el tamaño total del buffer 'var'.                   */
-#ifndef tomar_cadena
-#define tomar_cadena(var, tam) fgets((var), (tam), stdin)
-#endif
-
-int main() {
-    printf("sin tipo\n");
+int principal() {
+    imprimir("sin tipo\n");
     return 0;
 }

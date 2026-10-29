@@ -3,41 +3,32 @@
    NO EDITAR: modificar el .t y volver a transpilar            */
 /* ============================================================ */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <stdbool.h>
+#include "tharsis_host.h"
 
-/* Macro de tomar_cadena(var, tam): lee una línea de stdin.      */
-/* 'tam' es el tamaño total del buffer 'var'.                   */
-#ifndef tomar_cadena
-#define tomar_cadena(var, tam) fgets((var), (tam), stdin)
-#endif
-
-int main() {
+int principal() {
     int a = 1;
     int b = 0;
     int nota = 5;
     int yacimiento = 7;
 
     if (a && b) {
-        printf("a y b\n");
+        imprimir("a y b\n");
     }
 
     if (a || b) {
-        printf("a o b\n");
+        imprimir("a o b\n");
     }
 
     if (! b) {
-        printf("no b\n");
+        imprimir("no b\n");
     }
 
     if ((a > 0) && (b < 1)) {
-        printf("compuesto\n");
+        imprimir("compuesto\n");
     }
 
     if (nota > 3 && yacimiento < 10) {
-        printf("sin parentesis\n");
+        imprimir("sin parentesis\n");
     }
 
     return 0;

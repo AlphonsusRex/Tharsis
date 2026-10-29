@@ -3,16 +3,7 @@
    NO EDITAR: modificar el .t y volver a transpilar            */
 /* ============================================================ */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <stdbool.h>
-
-/* Macro de tomar_cadena(var, tam): lee una línea de stdin.      */
-/* 'tam' es el tamaño total del buffer 'var'.                   */
-#ifndef tomar_cadena
-#define tomar_cadena(var, tam) fgets((var), (tam), stdin)
-#endif
+#include "tharsis_host.h"
 
 #include <math.h>
 #include "mi_header.h"
@@ -20,8 +11,8 @@
 #define MAX 100
 #define Y 1
 
-int main() {
+int principal() {
     int x = MAX;
-    printf("%d\n", x);
+    imprimir("%d\n", x);
     return 0;
 }

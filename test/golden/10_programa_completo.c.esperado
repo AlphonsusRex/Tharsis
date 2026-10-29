@@ -3,16 +3,7 @@
    NO EDITAR: modificar el .t y volver a transpilar            */
 /* ============================================================ */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <stdbool.h>
-
-/* Macro de tomar_cadena(var, tam): lee una línea de stdin.      */
-/* 'tam' es el tamaño total del buffer 'var'.                   */
-#ifndef tomar_cadena
-#define tomar_cadena(var, tam) fgets((var), (tam), stdin)
-#endif
+#include "tharsis_host.h"
 
 #include <math.h>
 
@@ -21,7 +12,7 @@
 // programa integrador: combina tipos, control de flujo, operadores,
 // strings, chars y comentarios
 
-int main() {
+int principal() {
     int contador = 0;
     int suma = 0;
     float promedio = 0.0;
@@ -38,17 +29,17 @@ int main() {
 
     if (suma > 0) {
         promedio = suma / 5.0;
-        printf("suma: %d, promedio: %f\n", suma, promedio);
+        imprimir("suma: %d, promedio: %f\n", suma, promedio);
     } else {
-        printf("suma cero\n");
+        imprimir("suma cero\n");
     }
 
     switch (contador) {
         case 5:
-            printf("contador es 5, marca=%c\n", marca);
+            imprimir("contador es 5, marca=%c\n", marca);
             break;
         default:
-            printf("contador raro\n");
+            imprimir("contador raro\n");
             break;
     }
 

@@ -3,18 +3,9 @@
    NO EDITAR: modificar el .t y volver a transpilar            */
 /* ============================================================ */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <stdbool.h>
+#include "tharsis_host.h"
 
-/* Macro de tomar_cadena(var, tam): lee una línea de stdin.      */
-/* 'tam' es el tamaño total del buffer 'var'.                   */
-#ifndef tomar_cadena
-#define tomar_cadena(var, tam) fgets((var), (tam), stdin)
-#endif
-
-int main() {
+int principal() {
     int edad = 30;
     float temperatura = 22.5;
     double precision = 3.141592653589793;
@@ -25,8 +16,8 @@ int main() {
     unsigned int contador = 0;
     const float PI = 3.14;
 
-    printf("%d\n", edad);
-    printf("%f\n", temperatura);
-    printf("%c\n", inicial);
+    imprimir("%d\n", edad);
+    imprimir("%f\n", temperatura);
+    imprimir("%c\n", inicial);
     return 0;
 }

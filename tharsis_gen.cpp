@@ -1,9 +1,9 @@
 // ============================================================
-// tharsis_gen.cpp — Transpilador Tharsis → C (v0.2)
+// tharsis_gen.cpp — Transpilador Tharsis → C (v0.3)
 //
-// Transpila un archivo .t (Tharsis) a .c (C) y lo compila con gcc.
-// Uso: tharsis_gen <archivo.t> [--solo-c]
-//   --solo-c : solo genera el .c, no compila (útil para tests)
+// SOLO traduce el lenguaje C a español.
+// Toda la traducción de ESP-IDF está en include/tharsis_esp_idf.h
+// Toda la traducción de host está en include/tharsis_host.h
 // ============================================================
 
 #include <iostream>
@@ -13,25 +13,15 @@
 #include <cctype>
 #include <cstdlib>
 
-// ============================================================
-// Tipos
-// ============================================================
-
 struct ReglaTraduccion {
     std::string palabra_tharsis;
     std::string equivalente_c;
 };
 
-// Estado del lexer que persiste entre líneas (para comentarios /* */).
 struct EstadoLexer {
     bool en_comentario_bloque = false;
 };
 
-// ============================================================
-// Utilidades
-// ============================================================
-
-// Escapa una ruta como argumento de shell POSIX (comillas simples).
 std::string escapar_shell(const std::string& s) {
     std::string r = "'";
     for (char c : s) {
@@ -42,14 +32,17 @@ std::string escapar_shell(const std::string& s) {
     return r;
 }
 
-// ¿La línea empieza (ignorando espacios) con una directiva de preprocesador?
 bool es_directiva_preprocesador(const std::string& linea, size_t desde = 0) {
     size_t i = linea.find_first_not_of(" \t", desde);
     return i != std::string::npos && linea[i] == '#';
 }
 
+std::string basename(const std::string& path) {
+    size_t pos = path.find_last_of("/\\");
+    return (pos == std::string::npos) ? path : path.substr(pos + 1);
+}
+
 // ¿Hay un tipo (identificador alfanumérico) al final de 'resultado'?
-// Sirve para saber si 'principal' lleva ya un tipo delante (int, void...).
 bool hay_tipo_antes(const std::string& resultado) {
     for (size_t k = resultado.size(); k > 0; --k) {
         unsigned char c = static_cast<unsigned char>(resultado[k - 1]);
@@ -59,24 +52,12 @@ bool hay_tipo_antes(const std::string& resultado) {
     return false;
 }
 
-// ============================================================
-// Procesamiento de una línea
-// ============================================================
-// Recorre la línea carácter a carácter distinguiendo:
-//   - strings "..."     → copiados tal cual, respetando escapes
-//   - char literals 'x' → idem
-//   - // comentario     → copiado tal cual, sin traducir
-//   - /* */ comentario  → copiado tal cual, con estado entre líneas
-//   - código normal     → se intentan traducir las palabras clave
-// ============================================================
 std::string procesar_linea(const std::string& linea,
                            EstadoLexer& estado,
-                           const std::vector<ReglaTraduccion>& dicc, 
-                           bool modo_idf) {
+                           const std::vector<ReglaTraduccion>& dicc) {
     std::string resultado;
     size_t i = 0;
 
-    // 1) Continuar comentario de bloque iniciado en una línea anterior.
     if (estado.en_comentario_bloque) {
         while (i < linea.size()) {
             if (linea[i] == '*' && i + 1 < linea.size() && linea[i + 1] == '/') {
@@ -88,26 +69,22 @@ std::string procesar_linea(const std::string& linea,
             resultado += linea[i];
             ++i;
         }
-        if (estado.en_comentario_bloque) return resultado;  // sigue abierto
+        if (estado.en_comentario_bloque) return resultado;
     }
 
-    // 2) Directivas de preprocesador: copiar tal cual.
     if (es_directiva_preprocesador(linea, i)) {
         resultado += linea.substr(i);
         return resultado;
     }
 
-    // 3) Recorrido principal.
     while (i < linea.size()) {
         char c = linea[i];
 
-        // Comentario de línea: copiar el resto tal cual.
         if (c == '/' && i + 1 < linea.size() && linea[i + 1] == '/') {
             resultado += linea.substr(i);
             return resultado;
         }
 
-        // Comentario de bloque: copiar hasta '*/' o fin de línea.
         if (c == '/' && i + 1 < linea.size() && linea[i + 1] == '*') {
             estado.en_comentario_bloque = true;
             resultado += "/*";
@@ -125,7 +102,6 @@ std::string procesar_linea(const std::string& linea,
             continue;
         }
 
-        // String "...": copiar respetando secuencias de escape.
         if (c == '"') {
             resultado += c;
             ++i;
@@ -143,7 +119,6 @@ std::string procesar_linea(const std::string& linea,
             continue;
         }
 
-        // Char literal '...': copiar respetando secuencias de escape.
         if (c == '\'') {
             resultado += c;
             ++i;
@@ -161,7 +136,6 @@ std::string procesar_linea(const std::string& linea,
             continue;
         }
 
-        // Identificador o palabra: intentar traducir.
         if (std::isalpha(static_cast<unsigned char>(c)) || c == '_') {
             size_t inicio = i;
             while (i < linea.size() &&
@@ -169,54 +143,33 @@ std::string procesar_linea(const std::string& linea,
                 ++i;
             }
             std::string palabra = linea.substr(inicio, i - inicio);
+            
+            // Lógica especial para 'principal': añadir 'int' si no hay tipo
+            if (palabra == "principal") {
+                size_t j = i;
+                while (j < linea.size() &&
+                       std::isspace(static_cast<unsigned char>(linea[j]))) ++j;
+                bool seguido_de_paren = (j < linea.size() && linea[j] == '(');
 
-            bool traducida = false;
-            for (const auto& regla : dicc) {
-                if (regla.palabra_tharsis != palabra) continue;
-                
-                if (palabra == "imprimir" && modo_idf) {
-                    resultado += "ESP_LOGI(TAG, ";
-                    // Saltar espacios y el '(' que sigue a 'imprimir'
-                    while (i < linea.size() &&
-                           std::isspace(static_cast<unsigned char>(linea[i]))) ++i;
-                    if (i < linea.size() && linea[i] == '(') ++i;
-                    traducida = true;
-                    break;
+                if (seguido_de_paren && !hay_tipo_antes(resultado)) {
+                    resultado += "int "; 
                 }
-                
-                
-                if (palabra == "principal") {
-                    // ¿Le sigue '('? Entonces es definición/llamada.
-                    size_t j = i;
-                    while (j < linea.size() &&
-                        std::isspace(static_cast<unsigned char>(linea[j]))) ++j;
-                    bool seguido_de_paren = (j < linea.size() && linea[j] == '(');
-
-                        if (modo_idf) {
-                            // En ESP-IDF, el entry point es void app_main(void)
-                            if (seguido_de_paren && !hay_tipo_antes(resultado)) {
-                                resultado += "void app_main";
-                            } else {
-                                resultado += "app_main";
-                            }
-                        } else {
-                            // Modo host: int main()
-                            if (seguido_de_paren && !hay_tipo_antes(resultado)) {
-                                resultado += "int main";
-                            } else {
-                                resultado += "main";
-                            }
-                        }
-                    } else {
-                        resultado += regla.equivalente_c;
-                    }
-                    traducida = true;
-                    break;
-                }
-                if (!traducida) resultado += palabra;
+                resultado += palabra; 
                 continue;
             }
-        // Cualquier otro carácter (operadores, números, espacios...).
+            
+            bool traducida = false;
+            for (const auto& regla : dicc) {
+                if (regla.palabra_tharsis == palabra) {
+                    resultado += regla.equivalente_c;
+                    traducida = true;
+                    break;
+                }
+            }
+            if (!traducida) resultado += palabra;
+            continue;
+        }
+
         resultado += c;
         ++i;
     }
@@ -224,43 +177,32 @@ std::string procesar_linea(const std::string& linea,
     return resultado;
 }
 
-// Extrae el basename de un path (para el header del .c generado).
-std::string basename(const std::string& path) {
-    size_t pos = path.find_last_of("/\\");
-    return (pos == std::string::npos) ? path : path.substr(pos + 1);
-}
-
-
-// ============================================================
-// main
-// ============================================================
 int main(int argc, char* argv[]) {
     if (argc < 2) {
         std::cout << "Uso: tharsis_gen <archivo.t> [--solo-c] [--modo idf]\n";
-        std::cout << "  Transpila un archivo Tharsis (.t) a C (.c).\n";
-        std::cout << "  --solo-c : solo genera el .c, no compila con gcc.\n";
         return 1;
     }
 
     std::string nombre_archivo = argv[1];
-    bool solo_c = (argc >= 3 && std::string(argv[2]) == "--solo-c");
-
+    bool solo_c = false;
     bool modo_idf = false;
-    for (int i = 2; i < argc; ++i){
-      if(std::string(argv[i]) == "--modo" && i + 1 < argc){
-        modo_idf = (std::string(argv[i + 1]) == "idf");
-        ++i;
-      }
+
+    for (int i = 2; i < argc; ++i) {
+        std::string arg = argv[i];
+        if (arg == "--solo-c") solo_c = true;
+        else if (arg == "--modo" && i + 1 < argc) {
+            modo_idf = (std::string(argv[i + 1]) == "idf");
+            ++i;
+        }
     }
 
-    // Extensión .t / .T
     if (nombre_archivo.length() < 2) {
-        std::cerr << "Error: nombre de archivo inválido: " << nombre_archivo << "\n";
+        std::cerr << "Error: nombre de archivo inválido\n";
         return 1;
     }
     std::string ext = nombre_archivo.substr(nombre_archivo.length() - 2);
     if (ext != ".t" && ext != ".T") {
-        std::cerr << "Error: el archivo debe tener extensión .t: " << nombre_archivo << "\n";
+        std::cerr << "Error: el archivo debe tener extensión .t\n";
         return 1;
     }
 
@@ -279,11 +221,7 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    // --- Diccionario de traducción ---
-    // El matching es por palabra completa (identificadores), así que
-    // Y / O / NO no requieren espacios alrededor.
     std::vector<ReglaTraduccion> dicc = {
-        // Tipos
         {"entero",       "int"},
         {"decimal",      "float"},
         {"doble",        "double"},
@@ -293,18 +231,9 @@ int main(int argc, char* argv[]) {
         {"largo",        "long"},
         {"corto",        "short"},
 
-        // Entrada / salida / utilidades
-        // NOTA: imprimir(x) → printf(x). Solo válido si 'x' es un literal
-        //       de formato o un char*. Para enteros: imprimir("%d", x).
-        //       La versión con formato automático llega en v0.3 (parser).
-        {"imprimir",     "printf"},
         {"talla_de",     "sizeof"},
         {"nulo",         "NULL"},
-        // 'leer' → 'scanf' NO se traduce: scanf necesita "%d", &x y el
-        //        transpilador no conoce tipos. Pendiente para v0.3.
-        // 'tomar_cadena' se resuelve con una macro en la cabecera generada.
 
-        // Control de flujo
         {"si",           "if"},
         {"sino",         "else"},
         {"mientras",     "while"},
@@ -314,12 +243,10 @@ int main(int argc, char* argv[]) {
         {"caso",         "case"},
         {"por_defecto",  "default"},
 
-        // Salto
         {"retornar",     "return"},
         {"romper",       "break"},
         {"continuar",    "continue"},
 
-        // Modificadores
         {"constante",    "const"},
         {"estatico",     "static"},
         {"volatil",      "volatile"},
@@ -329,59 +256,29 @@ int main(int argc, char* argv[]) {
         {"definir_tipo", "typedef"},
         {"enumeracion",  "enum"},
 
-        // Booleanos
         {"verdadero",    "true"},
         {"falso",        "false"},
 
-        // Operadores lógicos (mayúsculas para no colisionar con variables)
         {"NO",           "!"},
         {"Y",            "&&"},
         {"O",            "||"},
-
-        // Función principal (lógica especial en procesar_linea)
-        {"principal",    "main"},
     };
 
-    // --- Cabecera del archivo C generado ---
     salida << "/* ============================================================ */\n";
     salida << "/* Generado por tharsis_gen desde: " << basename(nombre_archivo) << "\n";
     salida << "   NO EDITAR: modificar el .t y volver a transpilar            */\n";
     salida << "/* ============================================================ */\n\n";
 
-     if (modo_idf) {
-        // Cabecera ESP-IDF
-        salida << "#include <stdio.h>\n";
-        salida << "#include <stdlib.h>\n";
-        salida << "#include <string.h>\n";
-        salida << "#include <stdbool.h>\n";
-        salida << "#include \"freertos/FreeRTOS.h\"\n";
-        salida << "#include \"freertos/task.h\"\n";
-        salida << "#include \"esp_log.h\"\n\n";
-        salida << "static const char *TAG = \"tharsis\";\n\n";
-        salida << "#define retardo(ms) vTaskDelay(pdMS_TO_TICKS(ms))\n\n";
-        salida << "#define retardo_ms(ms) vTaskDelay(pdMS_TO_TICKS(ms))\n\n";
-        salida << "#define LOG_INFO(...)  ESP_LOGI(TAG, __VA_ARGS__)\n";
-        salida << "#define LOG_AVISO(...) ESP_LOGW(TAG, __VA_ARGS__)\n";
-        salida << "#define LOG_ERROR(...) ESP_LOGE(TAG, __VA_ARGS__)\n\n";
-        salida << "#define tarea(func, nombre) xTaskCreate(func, nombre, 2048, NULL, 5, NULL)\n\n";
+    if (modo_idf) {
+        salida << "#include \"tharsis_esp_idf.h\"\n\n";
     } else {
-        // Cabecera host (actual)
-        salida << "#include <stdio.h>\n";
-        salida << "#include <stdlib.h>\n";
-        salida << "#include <string.h>\n";
-        salida << "#include <stdbool.h>\n\n";
-        salida << "/* Macro de tomar_cadena(var, tam): lee una línea de stdin.      */\n";
-        salida << "/* 'tam' es el tamaño total del buffer 'var'.                   */\n";
-        salida << "#ifndef tomar_cadena\n";
-        salida << "#define tomar_cadena(var, tam) fgets((var), (tam), stdin)\n";
-        salida << "#endif\n\n";
+        salida << "#include \"tharsis_host.h\"\n\n";
     }
-    
-    // --- Procesar archivo línea a línea ---
+
     EstadoLexer estado;
     std::string linea;
     while (std::getline(entrada, linea)) {
-        salida << procesar_linea(linea, estado, dicc, modo_idf) << "\n";
+        salida << procesar_linea(linea, estado, dicc) << "\n";
     }
     if (estado.en_comentario_bloque) {
         std::cerr << "Advertencia: comentario /* sin cerrar al final del archivo\n";
@@ -394,12 +291,10 @@ int main(int argc, char* argv[]) {
 
     if (solo_c) return 0;
 
-    // --- Compilación con gcc ---
-    std::string comando = "gcc -std=c17 -Wall -Wextra -o "
+    std::string comando = "gcc -std=c17 -Wall -Wextra -Iinclude -o "
                         + escapar_shell(nombre_base) + " "
                         + escapar_shell(nombre_c);
     std::cout << "[2/2] Compilando: " << comando << "\n";
-    std::cout.flush();
 
     int rc = std::system(comando.c_str());
     if (rc == 0) {

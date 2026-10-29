@@ -3,18 +3,9 @@
    NO EDITAR: modificar el .t y volver a transpilar            */
 /* ============================================================ */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <stdbool.h>
+#include "tharsis_host.h"
 
-/* Macro de tomar_cadena(var, tam): lee una línea de stdin.      */
-/* 'tam' es el tamaño total del buffer 'var'.                   */
-#ifndef tomar_cadena
-#define tomar_cadena(var, tam) fgets((var), (tam), stdin)
-#endif
-
-int main() {
+int principal() {
     char c1 = 'T';
     char c2 = 'Y';
     char c3 = 'O';
@@ -22,6 +13,6 @@ int main() {
     char c5 = '\n';
     char c6 = '\\';
 
-    printf("%c %c %c %c %c %c\n", c1, c2, c3, c4, c5, c6);
+    imprimir("%c %c %c %c %c %c\n", c1, c2, c3, c4, c5, c6);
     return 0;
 }

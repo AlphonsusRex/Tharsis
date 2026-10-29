@@ -3,28 +3,19 @@
    NO EDITAR: modificar el .t y volver a transpilar            */
 /* ============================================================ */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <stdbool.h>
-
-/* Macro de tomar_cadena(var, tam): lee una línea de stdin.      */
-/* 'tam' es el tamaño total del buffer 'var'.                   */
-#ifndef tomar_cadena
-#define tomar_cadena(var, tam) fgets((var), (tam), stdin)
-#endif
+#include "tharsis_host.h"
 
 // este es un comentario de linea con si mientras retornar
 /* este es un comentario
    de bloque con si y mientras
    y retornar tambien */
 
-int main() {
+int principal() {
     int x = 1; // declaracion con si dentro del comentario
 
     /* comentario de bloque en una linea con Y O NO */
     if (x > 0) {
-        printf("positivo\n"); // imprimir en comentario
+        imprimir("positivo\n"); // imprimir en comentario
     }
 
     return 0;
