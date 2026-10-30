@@ -1,23 +1,23 @@
 #include "driver/gpio.h"
 
-#define LED_GPIO 2
+#definir PIN_LED 2
 
 principal() {
-    gpio_config_t config_led = {
-        .pin_bit_mask = (1ULL << LED_GPIO),
-        .mode = GPIO_MODE_OUTPUT,
-        .pull_up_en = GPIO_PULLUP_DISABLE,
-        .pull_down_en = GPIO_PULLDOWN_DISABLE,
-        .intr_type = GPIO_INTR_DISABLE
+    tipo_config_gpio config_led = {
+        .gpio_mascara_bits = (1ULL << PIN_LED),
+        .gpio_modo = MODO_GPIO_SALIDA,
+        .gpio_pull_up = PULL_UP_DESHABILITADO,
+        .gpio_pull_down = PULL_DOWN_DESHABILITADO,
+        .gpio_tipo_interrupcion = INTERRUPCION_DESHABILITADA
     };
-    gpio_config(&config_led);
+    configurar_gpio(&config_led);
 
     mientras (verdadero) {
-        gpio_set_level(LED_GPIO, 1);
+        establecer_nivel_gpio(PIN_LED, NIVEL_ALTO);
         retardo(500);
-        gpio_set_level(LED_GPIO, 0);
+        establecer_nivel_gpio(PIN_LED, NIVEL_BAJO);
         retardo(500);
     }
 
-    retornar 0;
+    retornar;
 }

@@ -7,7 +7,7 @@
 #include <stdbool.h>
 
 // Mapeo de la función principal en host
-#define principal main
+#define principal int main
 
 // Mapeo de imprimir
 #define imprimir printf

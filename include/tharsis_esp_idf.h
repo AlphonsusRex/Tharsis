@@ -15,7 +15,7 @@
 #endif
 
 // --- Mapeo de la función principal ---
-#define principal app_main
+#define principal void app_main
 
 // --- Entrada / salida ---
 #define imprimir(...) ESP_LOGI(TAG, __VA_ARGS__)
@@ -28,5 +28,11 @@
 #define retardo(ms)    vTaskDelay(pdMS_TO_TICKS(ms))
 #define cCrearTarea(func, nombre, pila, arg, prio, handle) \
     xTaskCreate(func, nombre, pila, arg, prio, handle)
+
+// --- Periféricos ---
+#include "tharsis_esp_idf/tharsis_gpio.h"
+// #include "tharsis_esp_idf/tharsis_adc.h"      // próximamente
+// #include "tharsis_esp_idf/tharsis_dac.h"      // próximamente
+// #include "tharsis_esp_idf/tharsis_mcpwm.h"    // próximamente
 
 #endif // THARSIS_ESP_IDF_H

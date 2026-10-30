@@ -72,8 +72,17 @@ std::string procesar_linea(const std::string& linea,
         if (estado.en_comentario_bloque) return resultado;
     }
 
-    if (es_directiva_preprocesador(linea, i)) {
-        resultado += linea.substr(i);
+        if (es_directiva_preprocesador(linea, i)) {
+        std::string resto = linea.substr(i);
+        // Traducir #incluir a #include
+        if (resto.rfind("#incluir", 0) == 0) {
+            resto.replace(0, 8, "#include");
+        }
+        // Traducir #definir a #define
+        if (resto.rfind("#definir", 0) == 0) {
+            resto.replace(0, 8, "#define");
+        }
+        resultado += resto;
         return resultado;
     }
 
@@ -143,24 +152,10 @@ std::string procesar_linea(const std::string& linea,
                 ++i;
             }
             std::string palabra = linea.substr(inicio, i - inicio);
-            
-            // Lógica especial para 'principal': añadir 'int' si no hay tipo
-            if (palabra == "principal") {
-                size_t j = i;
-                while (j < linea.size() &&
-                       std::isspace(static_cast<unsigned char>(linea[j]))) ++j;
-                bool seguido_de_paren = (j < linea.size() && linea[j] == '(');
 
-                if (seguido_de_paren && !hay_tipo_antes(resultado)) {
-                    resultado += "int "; 
-                }
-                resultado += palabra; 
-                continue;
-            }
-            
             bool traducida = false;
             for (const auto& regla : dicc) {
-                if (regla.palabra_tharsis == palabra) {
+               if (regla.palabra_tharsis == palabra) {
                     resultado += regla.equivalente_c;
                     traducida = true;
                     break;
@@ -222,6 +217,9 @@ int main(int argc, char* argv[]) {
     }
 
     std::vector<ReglaTraduccion> dicc = {
+        {"incluir",      "#include"},
+        {"definir",      "#define"},
+        
         {"entero",       "int"},
         {"decimal",      "float"},
         {"doble",        "double"},
