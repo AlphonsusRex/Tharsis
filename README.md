@@ -1,3 +1,9 @@
+Aquí tienes el `README.md` completamente actualizado, limpio y en formato Markdown. He reconstruido las tablas que en tu archivo de texto estaban mezcladas, he añadido la foto del ESP32 justo antes del código de Blinky como pediste, he incluido las tablas de ADC, DAC y la nueva de RTC GPIO, y he actualizado el estado a la **v0.4.0**.
+
+Puedes copiar y pegar esto directamente en tu archivo `README.md`:
+
+***
+
 # Tharsis
 
 **C en español para ESP32.**
@@ -8,11 +14,13 @@ Tharsis es un transpilador que te permite escribir C con palabras clave en espa�
 
 ## Estado
 
-**v0.3.0** — Blinky funcional en ESP32-WROOM-32 real.
+**v0.4.0** — Periféricos Básicos y Deep Sleep funcional en ESP32-WROOM-32 real.
 
-- ✅ Transpilador host con 12 golden tests verdes.
+- ✅ Transpilador host con 13 golden tests verdes.
 - ✅ Modo `--modo idf` para ESP-IDF.
 - ✅ Ejemplo Blinky compilando y flasheando en hardware real.
+- ✅ Periféricos: GPIO, ADC, DAC.
+- ✅ RTC GPIO y Deep Sleep (EXT0) con ejemplo funcional.
 
 ## Por qué
 
@@ -56,30 +64,30 @@ Clonar y compilar:
 ## Uso en ESP32 (Blinky)
 
 El ejemplo completo está en `examples/esp32/blinky/`.
-
 `examples/esp32/blinky/main/blinky.t`:
+
 ![Blinky en ESP32-WROOM-32](docs/img/blinky_small.gif)
 
 *LED del GPIO 2 parpadeando cada 500 ms en una ESP32-WROOM-32 real.*
-    
+
     #include "driver/gpio.h"
 
     #define LED_GPIO 2
 
     principal() {
-        gpio_config_t config_led = {
-            .pin_bit_mask = (1ULL << LED_GPIO),
-            .mode = GPIO_MODE_OUTPUT,
-            .pull_up_en = GPIO_PULLUP_DISABLE,
-            .pull_down_en = GPIO_PULLDOWN_DISABLE,
-            .intr_type = GPIO_INTR_DISABLE
+        tipo_config_gpio config_led = {
+            .gpio_mascara_bits = (1ULL << LED_GPIO),
+            .gpio_modo = MODO_GPIO_SALIDA,
+            .gpio_pull_up = PULL_UP_DESHABILITADO,
+            .gpio_pull_down = PULL_DOWN_DESHABILITADO,
+            .gpio_tipo_interrupcion = INTERRUPCION_DESHABILITADA
         };
-        gpio_config(&config_led);
+        configurar_gpio(&config_led);
 
         mientras (verdadero) {
-            gpio_set_level(LED_GPIO, 1);
+            establecer_nivel_gpio(LED_GPIO, NIVEL_ALTO);
             retardo(500);
-            gpio_set_level(LED_GPIO, 0);
+            establecer_nivel_gpio(LED_GPIO, NIVEL_BAJO);
             retardo(500);
         }
     }
@@ -255,6 +263,23 @@ Esto se consigue mediante los archivos de cabecera en `include/tharsis_esp_idf/`
 | `DAC_CHANNEL_1` (GPIO 25) | `CANAL_DAC_1` |
 | `DAC_CHANNEL_2` (GPIO 26) | `CANAL_DAC_2` |
 
+#### Ejemplo: RTC GPIO y Deep Sleep
+
+| Original (ESP-IDF) | Tharsis (Español) |
+|---|---|
+| `rtc_gpio_is_valid_gpio()` | `es_gpio_rtc_valido()` |
+| `rtc_gpio_pullup_en()` / `_dis()` | `habilitar_pullup_rtc()` / `deshabilitar_pullup_rtc()` |
+| `rtc_gpio_pulldown_en()` / `_dis()` | `habilitar_pulldown_rtc()` / `deshabilitar_pulldown_rtc()` |
+| `rtc_gpio_hold_en()` / `_dis()` | `retener_gpio_rtc()` / `liberar_gpio_rtc()` |
+| `rtc_gpio_deinit()` | `desinicializar_gpio_rtc()` |
+| `esp_sleep_enable_ext0_wakeup()` | `habilitar_despertar_ext0()` |
+| `esp_sleep_enable_timer_wakeup()` | `habilitar_despertar_temporizador()` |
+| `esp_deep_sleep_start()` | `iniciar_sueno_profundo()` |
+| `esp_sleep_get_wakeup_cause()` | `obtener_causa_despertar()` |
+| `ESP_SLEEP_WAKEUP_EXT0` | `CAUSA_DESPERTAR_EXT0` |
+| `ESP_SLEEP_WAKEUP_TIMER` | `CAUSA_DESPERTAR_TEMPORIZADOR` |
+| `RTC_DATA_ATTR` | `ATRIBUTO_DATOS_RTC` |
+
 ## Cómo funciona
 
 1. Lee un archivo `.t` línea a línea.
@@ -267,11 +292,11 @@ Los strings, chars y comentarios no se traducen. Las directivas `#include`, `#de
 ## Tests
 
     bash test/run_tests.sh
-    # PASS: 12  FAIL: 0
+    # PASS: 13  FAIL: 0
 
 Cada test es un `.t` + un `.c.esperado`. Si el `.c` generado difiere del esperado, el test falla. Esto garantiza que ningún cambio rompa el comportamiento existente.
 
-## Limitaciones conocidas (v0.3.0)
+## Limitaciones conocidas (v0.4.0)
 
 - **No es un lenguaje completo**: es C con keywords en español. La sintaxis debe ser C válido.
 - **`imprimir(x)` sin formato no funciona**: usa `imprimir("%d\n", x)` en host.
@@ -283,9 +308,10 @@ Cada test es un `.t` + un `.c.esperado`. Si el `.c` generado difiere del esperad
 ## Roadmap
 
 - **v0.3.0** ✅ — Modo idf + Blinky en ESP32 real.
-- **v0.4.0** — Azúcar ESP-IDF: `tarea`, `log_info`, `externo "..."`, `seccion_critica`.
-- **v0.5.0** — Wrapper `tharsis build/flash/monitor`.
-- **v0.6.0** — Parser ligero para `imprimir` con formato automático.
+- **v0.4.0** ✅ — Periféricos básicos: GPIO, ADC, DAC, RTC GPIO (Deep Sleep).
+- **v0.5.0** — Azúcar ESP-IDF: `tarea`, `log_info`, `externo "..."`, `seccion_critica`, WiFi.
+- **v0.6.0** — Wrapper `tharsis build/flash/monitor`.
+- **v0.7.0** — Parser ligero para `imprimir` con formato automático.
 - **v1.0.0** — Release estable con ejemplos completos y docs.
 
 ## Contribuir
