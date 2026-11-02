@@ -5,7 +5,7 @@
 
 #include "tharsis_host.h"
 
-int principal() {
+principal() {
     imprimir("sin tipo\n");
     return 0;
 }

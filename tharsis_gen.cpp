@@ -1,9 +1,5 @@
 // ============================================================
-// tharsis_gen.cpp — Transpilador Tharsis → C (v0.3)
-//
-// SOLO traduce el lenguaje C a español.
-// Toda la traducción de ESP-IDF está en include/tharsis_esp_idf.h
-// Toda la traducción de host está en include/tharsis_host.h
+// tharsis_gen.cpp — Transpilador Tharsis → C (v0.3.1 - Corregido)
 // ============================================================
 
 #include <iostream>
@@ -32,11 +28,6 @@ std::string escapar_shell(const std::string& s) {
     return r;
 }
 
-bool es_directiva_preprocesador(const std::string& linea, size_t desde = 0) {
-    size_t i = linea.find_first_not_of(" \t", desde);
-    return i != std::string::npos && linea[i] == '#';
-}
-
 std::string basename(const std::string& path) {
     size_t pos = path.find_last_of("/\\");
     return (pos == std::string::npos) ? path : path.substr(pos + 1);
@@ -58,6 +49,7 @@ std::string procesar_linea(const std::string& linea,
     std::string resultado;
     size_t i = 0;
 
+    // 1) Continuar comentario de bloque iniciado en línea anterior
     if (estado.en_comentario_bloque) {
         while (i < linea.size()) {
             if (linea[i] == '*' && i + 1 < linea.size() && linea[i + 1] == '/') {
@@ -69,31 +61,38 @@ std::string procesar_linea(const std::string& linea,
             resultado += linea[i];
             ++i;
         }
+        // CORRECCIÓN: Si sigue abierto, retornamos. Si ya se cerró, 
+        // permitimos que el flujo continúe con el resto de la línea.
         if (estado.en_comentario_bloque) return resultado;
     }
 
-        if (es_directiva_preprocesador(linea, i)) {
-        std::string resto = linea.substr(i);
-        // Traducir #incluir a #include
+    // 2) Directivas de preprocesador (manejando posibles espacios previos)
+    size_t dir_idx = linea.find_first_not_of(" \t", i);
+    if (dir_idx != std::string::npos && linea[dir_idx] == '#') {
+        // Copiamos los espacios previos si los hubiera
+        resultado += linea.substr(0, dir_idx);
+        std::string resto = linea.substr(dir_idx);
+        
         if (resto.rfind("#incluir", 0) == 0) {
             resto.replace(0, 8, "#include");
-        }
-        // Traducir #definir a #define
-        if (resto.rfind("#definir", 0) == 0) {
+        } else if (resto.rfind("#definir", 0) == 0) {
             resto.replace(0, 8, "#define");
         }
         resultado += resto;
         return resultado;
     }
 
+    // 3) Recorrido principal de tokens y literales
     while (i < linea.size()) {
         char c = linea[i];
 
+        // Comentario de línea
         if (c == '/' && i + 1 < linea.size() && linea[i + 1] == '/') {
             resultado += linea.substr(i);
             return resultado;
         }
 
+        // Comentario de bloque que empieza en esta línea
         if (c == '/' && i + 1 < linea.size() && linea[i + 1] == '*') {
             estado.en_comentario_bloque = true;
             resultado += "/*";
@@ -111,6 +110,7 @@ std::string procesar_linea(const std::string& linea,
             continue;
         }
 
+        // Cadenas de texto
         if (c == '"') {
             resultado += c;
             ++i;
@@ -128,6 +128,7 @@ std::string procesar_linea(const std::string& linea,
             continue;
         }
 
+        // Caracteres individuales
         if (c == '\'') {
             resultado += c;
             ++i;
@@ -145,6 +146,7 @@ std::string procesar_linea(const std::string& linea,
             continue;
         }
 
+        // Identificadores y palabras clave
         if (std::isalpha(static_cast<unsigned char>(c)) || c == '_') {
             size_t inicio = i;
             while (i < linea.size() &&

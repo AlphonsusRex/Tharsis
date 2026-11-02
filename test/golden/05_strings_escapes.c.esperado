@@ -5,7 +5,7 @@
 
 #include "tharsis_host.h"
 
-int principal() {
+principal() {
     imprimir("comillas: \"hola\"\n");
     imprimir("barra: \\ y salto: \n");
     imprimir("tab: \t fin\n");

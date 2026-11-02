@@ -132,6 +132,10 @@ Compilar y flashear:
     idf.py build
     idf.py -p /dev/ttyUSB0 flash monitor
 
+ **Nota sobre dependencias de ESP-IDF 5.x**: 
+ Si tu `.t` incluye cabeceras como `#include "driver/adc.h"`, debes añadir el componente correspondiente a tu `CMakeLists.txt`:
+ `idf_component_register(SRCS "adc.c" INCLUDE_DIRS "." "ruta/a/include" PRIV_REQUIRES driver esp_adc)`
+
 ## Referencia Tharsis ↔ C
 
 Esta tabla es el contrato del lenguaje. Cualquier cambio aquí es un cambio de versión.
@@ -209,6 +213,47 @@ Los operadores se reconocen por palabra completa. `nota` y `yacimiento` no se ve
 | `LOG_ERROR(...)` | `ESP_LOGE(TAG, ...)` |
 | `retardo_ms(ms)` | `vTaskDelay(pdMS_TO_TICKS(ms))` |
 | `tarea(func, nombre)` | `xTaskCreate(func, nombre, 2048, NULL, 5, NULL)` |
+
+### Traducción completa de periféricos (v0.4.0)
+
+A partir de la v0.4.0, Tharsis incluye una traducción **completa** de los periféricos más usados de ESP-IDF. No solo las funciones, también las **estructuras, campos de estructuras, constantes y macros**.
+
+Esto se consigue mediante los archivos de cabecera en `include/tharsis_esp_idf/`.
+
+#### Ejemplo: GPIO
+
+| Original (ESP-IDF) | Tharsis (Español) |
+|---|---|
+| `gpio_config_t` | `tipo_config_gpio` |
+| `.pin_bit_mask` | `.gpio_mascara_bits` |
+| `.mode` | `.gpio_modo` |
+| `.pull_up_en` | `.gpio_pull_up` |
+| `GPIO_MODE_OUTPUT` | `MODO_GPIO_SALIDA` |
+| `GPIO_PULLUP_DISABLE` | `PULL_UP_DESHABILITADO` |
+| `gpio_config()` | `configurar_gpio()` |
+| `gpio_set_level()` | `establecer_nivel_gpio()` |
+| `GPIO_INTR_DISABLE` | `INTERRUPCION_DESHABILITADA` |
+
+#### Ejemplo: ADC
+
+| Original (ESP-IDF) | Tharsis (Español) |
+|---|---|
+| `adc1_config_width()` | `configurar_ancho_adc_1()` |
+| `adc1_config_channel_atten()` | `configurar_atenuacion_canal_adc_1()` |
+| `adc1_get_raw()` | `leer_adc_1_crudo()` |
+| `ADC1_CHANNEL_0` a `ADC1_CHANNEL_7` | `CANAL_ADC_1_0` a `CANAL_ADC_1_7` |
+| `ADC_WIDTH_BIT_9` a `ADC_WIDTH_BIT_12` | `ANCHO_ADC_9_BITS` a `ANCHO_ADC_12_BITS` |
+| `ADC_ATTEN_DB_0` a `ADC_ATTEN_DB_11` | `ATENUACION_ADC_0_DB` a `ATENUACION_ADC_11_DB` |
+
+#### Ejemplo: DAC
+
+| Original (ESP-IDF) | Tharsis (Español) |
+|---|---|
+| `dac_output_enable()` | `habilitar_dac()` |
+| `dac_output_disable()` | `deshabilitar_dac()` |
+| `dac_output_voltage()` | `escribir_voltaje_dac()` |
+| `DAC_CHANNEL_1` (GPIO 25) | `CANAL_DAC_1` |
+| `DAC_CHANNEL_2` (GPIO 26) | `CANAL_DAC_2` |
 
 ## Cómo funciona
 

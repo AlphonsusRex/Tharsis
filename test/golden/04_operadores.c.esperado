@@ -5,7 +5,7 @@
 
 #include "tharsis_host.h"
 
-int principal() {
+principal() {
     int a = 1;
     int b = 0;
     int nota = 5;

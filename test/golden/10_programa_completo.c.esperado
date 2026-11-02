@@ -12,7 +12,7 @@
 // programa integrador: combina tipos, control de flujo, operadores,
 // strings, chars y comentarios
 
-int principal() {
+principal() {
     int contador = 0;
     int suma = 0;
     float promedio = 0.0;

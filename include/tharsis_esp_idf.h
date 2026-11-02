@@ -33,6 +33,7 @@
 #include "tharsis_esp_idf/tharsis_gpio.h"
 #include "tharsis_esp_idf/tharsis_adc.h"
 #include "tharsis_esp_idf/tharsis_dac.h"
+ #include "tharsis_esp_idf/tharsis_rtc_gpio.h"    
 // #include "tharsis_esp_idf/tharsis_mcpwm.h"    // próximamente
 
 #endif // THARSIS_ESP_IDF_H

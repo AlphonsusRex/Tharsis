@@ -10,7 +10,7 @@
    de bloque con si y mientras
    y retornar tambien */
 
-int principal() {
+principal() {
     int x = 1; // declaracion con si dentro del comentario
 
     /* comentario de bloque en una linea con Y O NO */
