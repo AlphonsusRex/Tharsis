@@ -280,6 +280,26 @@ Esto se consigue mediante los archivos de cabecera en `include/tharsis_esp_idf/`
 | `ESP_SLEEP_WAKEUP_TIMER` | `CAUSA_DESPERTAR_TEMPORIZADOR` |
 | `RTC_DATA_ATTR` | `ATRIBUTO_DATOS_RTC` |
 
+
+#### Ejemplo: MCPWM (PWM Avanzado)
+
+| Original (ESP-IDF v5.x) | Tharsis (Español) |
+|---|---|
+| `mcpwm_timer_handle_t` | `tipo_temporizador_mcpwm` |
+| `mcpwm_timer_config_t` | `tipo_config_temporizador_mcpwm` |
+| `mcpwm_oper_handle_t` | `tipo_operador_mcpwm` |
+| `mcpwm_cmpr_handle_t` | `tipo_comparador_mcpwm` |
+| `mcpwm_gen_handle_t` | `tipo_generador_mcpwm` |
+| `mcpwm_new_timer()` | `crear_temporizador_mcpwm()` |
+| `mcpwm_new_operator()` | `crear_operador_mcpwm()` |
+| `mcpwm_new_comparator()` | `crear_comparador_mcpwm()` |
+| `mcpwm_new_generator()` | `crear_generador_mcpwm()` |
+| `mcpwm_timer_start_stop()` | `iniciar_temporizador_mcpwm()` |
+| `mcpwm_comparator_set_compare_value()` | `establecer_comparacion_mcpwm()` |
+| `MCPWM_TIMER_COUNT_MODE_UP` | `MODO_CONTEO_ASCENDENTE` |
+| `MCPWM_TIMER_START_NO_STOP` | `INICIO_CONTINUO_MCPWM` |
+
+
 ## Cómo funciona
 
 1. Lee un archivo `.t` línea a línea.
