@@ -300,6 +300,21 @@ Esto se consigue mediante los archivos de cabecera en `include/tharsis_esp_idf/`
 | `MCPWM_TIMER_START_NO_STOP` | `INICIO_CONTINUO_MCPWM` |
 
 
+#### Ejemplo: WiFi (Azúcar de Red)
+
+| Original (ESP-IDF) | Tharsis (Español) |
+|---|---|
+| Configurar NVS + TCP/IP + Event Loop | (Gestionado internamente) |
+| `esp_wifi_init()`, `esp_wifi_start()` | `iniciar_wifi(ssid, pass)` |
+| `esp_event_handler_register()` | (Gestionado internamente) |
+
+**Ejemplo de uso:**
+```c
+principal() {
+    iniciar_wifi("MiRed", "MiPassword");
+    LOG_INFO("¡Ya estoy en internet!");
+}
+
 ## Cómo funciona
 
 1. Lee un archivo `.t` línea a línea.
