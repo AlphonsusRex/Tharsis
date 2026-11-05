@@ -308,6 +308,26 @@ Esto se consigue mediante los archivos de cabecera en `include/tharsis_esp_idf/`
 | `esp_wifi_init()`, `esp_wifi_start()` | `iniciar_wifi(ssid, pass)` |
 | `esp_event_handler_register()` | (Gestionado internamente) |
 
+#### Ejemplo: I2C (Sensores y Pantallas)
+
+| Original (ESP-IDF v5.x) | Tharsis (Español) |
+|---|---|
+| `i2c_master_bus_handle_t` | `tipo_manejador_bus_i2c` |
+| `i2c_master_bus_config_t` | `tipo_config_bus_i2c_maestro` |
+| `i2c_new_master_bus()` | `crear_bus_i2c()` |
+| `i2c_master_probe()` | `probar_dispositivo_i2c()` |
+| `i2c_master_transmit()` | `transmitir_i2c()` |
+| `i2c_master_receive()` | `recibir_i2c()` |
+| `sda_io_num` / `scl_io_num` | `pin_sda` / `pin_scl` |
+| `I2C_NUM_0` | `PUERTO_I2C_0` |
+
+#### Ejemplo: Temporizador de Alta Resolución (esp_timer)
+
+| Original (ESP-IDF) | Tharsis (Español) |
+|---|---|
+| `esp_timer_get_time()` | `obtener_tiempo_us()` |
+| `int64_t` | `tipo_tiempo_us` |
+
 **Ejemplo de uso:**
 ```c
 principal() {

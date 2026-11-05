@@ -36,5 +36,8 @@
 #include "tharsis_esp_idf/tharsis_rtc_gpio.h"    
 #include "tharsis_esp_idf/tharsis_mcpwm.h"  
 #include "tharsis_esp_idf/tharsis_wifi.h" 
-
+#include "tharsis_esp_idf/tharsis_i2c.h"
+#include "tharsis_esp_idf/tharsis_isr.h"
+#include "tharsis_esp_idf/tharsis_timer.h"
+    
 #endif // THARSIS_ESP_IDF_H

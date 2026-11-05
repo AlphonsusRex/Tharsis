@@ -17,6 +17,7 @@ Transpilador de C a "C con palabras clave en español" para ESP32.
   - RTC GPIO + Deep Sleep (EXT0 en pin 33)
   - MCPWM (PWM Avanzado con nueva API de IDF v5.5)
   - **WiFi (Conexión STA en 1 línea):** Probado con éxito conectando a red Movistar y obteniendo IP.
+  - **I2C (Escáner funcional):** Implementado con la nueva API `i2c_master` de IDF v5.5. Manejo de sub-estructura `.flags` resuelto.
 - **Git:** Rama `v0.3`, tag `v0.6.0`.
 
 ## 3. Próximos Pasos (Roadmap Robot)
